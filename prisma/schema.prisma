@@ -1,0 +1,141 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Protocols {
+  http
+  https
+}
+
+enum Statuses {
+  active
+  disabled
+}
+
+enum Header {
+  static
+  dynamic
+}
+
+model User {
+  user_id    Int         @id @default(autoincrement())
+  user_name  String
+  full_name  String?
+  email      String      @unique
+  password   String
+  phone      String?
+  created_by String
+  created_at DateTime
+  updated_by String?
+  updated_at DateTime?
+  deleted_by String?
+  deleted_at DateTime?
+  workspace  Workspace[]
+}
+
+model Workspace {
+  workspace_id Int               @id @default(autoincrement())
+  user_id      Int
+  service_id   Int
+  description  String?
+  created_by   String
+  created_at   DateTime
+  updated_by   String?
+  updated_at   DateTime?
+  deleted_by   String?
+  deleted_at   DateTime?
+  member       WorkspaceMember[]
+  services     Service[]
+  User         User?             @relation(fields: [userUser_id], references: [user_id])
+  userUser_id  Int?
+}
+
+model WorkspaceMember {
+  member_id             Int        @id @default(autoincrement())
+  user_id               Int
+  workspace_id          Int
+  description           String?
+  created_by            String
+  created_at            DateTime
+  updated_by            String?
+  updated_at            DateTime?
+  deleted_by            String?
+  deleted_at            DateTime?
+  Workspace             Workspace? @relation(fields: [workspaceWorkspace_id], references: [workspace_id])
+  workspaceWorkspace_id Int?
+}
+
+model Service {
+  service_id            String     @id
+  name                  String
+  description           String?
+  protocol              Protocols  @default(http)
+  host                  String
+  port                  Int
+  status                Statuses   @default(active)
+  created_by            String
+  created_at            DateTime
+  updated_by            String?
+  updated_at            DateTime?
+  deleted_by            String?
+  deleted_at            DateTime?
+  routes                Routes[]
+  Workspace             Workspace? @relation(fields: [workspaceWorkspace_id], references: [workspace_id])
+  workspaceWorkspace_id Int?
+}
+
+model Routes {
+  route_id          Int         @id
+  service_id        String
+  name              String
+  description       String?
+  valid_header      Header      @default(dynamic)
+  created_by        String
+  created_at        DateTime
+  updated_by        String?
+  updated_at        DateTime?
+  deleted_by        String?
+  deleted_at        DateTime?
+  Service           Service?    @relation(fields: [serviceService_id], references: [service_id])
+  serviceService_id String?
+  endpoints         Endpoints[]
+}
+
+model Endpoints {
+  endpoint_id    Int       @id @default(autoincrement())
+  route_id       Int
+  name           String
+  path           String
+  description    String?
+  created_by     String
+  created_at     DateTime
+  updated_by     String?
+  updated_at     DateTime?
+  deleted_by     String?
+  deleted_at     DateTime?
+  Routes         Routes?   @relation(fields: [routesRoute_id], references: [route_id])
+  routesRoute_id Int?
+}
+
+model Endpoint_Methods {
+  id          Int       @id @default(autoincrement())
+  method      String
+  description String
+  created_by  String
+  created_at  DateTime
+  updated_by  String?
+  updated_at  DateTime?
+  deleted_by  String?
+  deleted_at  DateTime?
+}
