@@ -18,5 +18,13 @@ export const RouteGateway: FX_ROUTERS.TRouterConfigs = {
         auth: false,
       },
     ],
+    POST: [
+      {
+        suffix: "generate-services",
+        code: "POST-SERVE",
+        name: "Generate new services gateway",
+        auth: false,
+      },
+    ]
   },
 };

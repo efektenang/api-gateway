@@ -1,6 +1,7 @@
 import { RouteGateway } from "./paths/data-center/gateway";
 import { RouteRegion } from "./paths/data-center/region";
 import { RouteUser } from "./paths/data-center/user";
+import { RouteWorkspace } from "./paths/data-center/workspace";
 
 export const routes: FX_ROUTERS.TRouterConfigs[] = [
   {
@@ -8,14 +9,15 @@ export const routes: FX_ROUTERS.TRouterConfigs[] = [
     children: [
       // Data Center
       RouteRegion,
-      RouteGateway
+      RouteGateway,
     ],
   },
   {
-    path: "gateway",
+    path: "api/v1",
     children: [
       // Data Center
       RouteUser,
+      RouteWorkspace
     ],
   },
 ];

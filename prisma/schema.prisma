@@ -36,34 +36,31 @@ model User {
   password   String
   phone      String?
   created_by String
-  created_at DateTime
+  created_at DateTime    @default(now())
   updated_by String?
   updated_at DateTime?
   deleted_by String?
   deleted_at DateTime?
-  workspace  Workspace[]
 }
 
 model Workspace {
   workspace_id Int               @id @default(autoincrement())
-  user_id      Int
-  service_id   Int
+  user_id      String
+  name         String
   description  String?
   created_by   String
-  created_at   DateTime
+  created_at   DateTime          @default(now())
   updated_by   String?
   updated_at   DateTime?
   deleted_by   String?
   deleted_at   DateTime?
   member       WorkspaceMember[]
   services     Service[]
-  User         User?             @relation(fields: [userUser_id], references: [user_id])
-  userUser_id  Int?
 }
 
 model WorkspaceMember {
   member_id             Int        @id @default(autoincrement())
-  user_id               Int
+  user_id               String
   workspace_id          Int
   description           String?
   created_by            String
