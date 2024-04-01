@@ -9,7 +9,6 @@ export const routes: FX_ROUTERS.TRouterConfigs[] = [
     children: [
       // Data Center
       RouteRegion,
-      RouteGateway,
     ],
   },
   {
@@ -17,7 +16,8 @@ export const routes: FX_ROUTERS.TRouterConfigs[] = [
     children: [
       // Data Center
       RouteUser,
-      RouteWorkspace
+      RouteWorkspace,
+      RouteGateway
     ],
   },
 ];

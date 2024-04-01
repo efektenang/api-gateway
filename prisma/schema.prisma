@@ -41,6 +41,7 @@ model User {
   updated_at DateTime?
   deleted_by String?
   deleted_at DateTime?
+  workspaces Workspace[]
 }
 
 model Workspace {
@@ -56,6 +57,8 @@ model Workspace {
   deleted_at   DateTime?
   member       WorkspaceMember[]
   services     Service[]
+  User         User?             @relation(fields: [userUser_id], references: [user_id])
+  userUser_id  Int?
 }
 
 model WorkspaceMember {
@@ -77,12 +80,12 @@ model Service {
   service_id            String     @id
   name                  String
   description           String?
-  protocol              Protocols  @default(http)
+  protocol              String
   host                  String
   port                  Int
-  status                Statuses   @default(active)
+  status                String
   created_by            String
-  created_at            DateTime
+  created_at            DateTime   @default(now())
   updated_by            String?
   updated_at            DateTime?
   deleted_by            String?

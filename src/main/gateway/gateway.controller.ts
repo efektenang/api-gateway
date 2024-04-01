@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   HttpStatus,
   Param,
   Post,
@@ -9,8 +10,8 @@ import {
   Res,
 } from "@nestjs/common";
 import { GatewayServices } from "./gateway.service";
-import { Request } from "express";
-import { Response } from "@utilities/helper-type.util";
+import { Request, Response } from "@utilities/helper-type.util";
+import { CreateServicesDTO, UpdateServiceDTO } from "@dtos/services.dto";
 
 @Controller()
 export class GatewayController {
@@ -40,12 +41,50 @@ export class GatewayController {
   }
 
   @Post("generate-services")
-  async saveServices(@Body() body: any, @Res() res: Response) {
-    return this.gateway.createServices(body).then((result) =>
-      res.asJson(HttpStatus.OK, {
-        message: "OK",
-        data: result,
-      })
-    );
+  async saveServices(
+    @Body() body: CreateServicesDTO,
+    @Res() res: Response,
+    @Req() req: Request,
+    @Headers() header: any
+  ) {
+    return this.gateway
+      .createServices(
+        {
+          userID: req.user_auth.user_name,
+          workspace: parseInt(header["x-workspace-id"]),
+        },
+        body
+      )
+      .then((result) =>
+        res.asJson(HttpStatus.OK, {
+          message: "OK",
+          data: result,
+        })
+      );
+  }
+
+  @Post("update-services/:serviceKey")
+  async updateServices(
+    @Body() body: UpdateServiceDTO,
+    @Res() res: Response,
+    @Req() req: Request,
+    @Headers() header: any,
+    @Param('serviceKey') params: string
+  ) {
+    return this.gateway
+      .updateBasicInfoServices(
+        {
+          userID: req.user_auth.user_name,
+          workspace: parseInt(header["x-workspace-id"]),
+        },
+        body,
+        params
+      )
+      .then((result) =>
+        res.asJson(HttpStatus.OK, { message: "OK", data: result })
+      )
+      .catch((err: any) =>
+        res.asJson(HttpStatus.BAD_REQUEST, { message: err.message })
+      );
   }
 }

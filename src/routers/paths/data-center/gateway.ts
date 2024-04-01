@@ -8,7 +8,7 @@ export const RouteGateway: FX_ROUTERS.TRouterConfigs = {
       {
         suffix: "services",
         code: "GET-REG",
-        name: "Get data region",
+        name: "Get list gateway services",
         auth: false,
       },
       {
@@ -20,10 +20,16 @@ export const RouteGateway: FX_ROUTERS.TRouterConfigs = {
     ],
     POST: [
       {
-        suffix: "generate-services",
+        suffix: "*",
         code: "POST-SERVE",
         name: "Generate new services gateway",
-        auth: false,
+        auth: true,
+      },
+      {
+        suffix: "update-services/:serviceKey",
+        code: "POST-SERVE",
+        name: "Update information of services gateway",
+        auth: true,
       },
     ]
   },
