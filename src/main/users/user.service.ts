@@ -4,8 +4,6 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { IJwtCustom, JwtCustom } from "@utilities/token-generator.util";
-import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
 import {
   ChangePasswordDto,
   LoginUserDto,
@@ -16,16 +14,12 @@ import * as encryptions from "@utilities/encryption.util";
 import shortUniqueId from "short-unique-id";
 import { IUsers } from "@interfaces/user.interface";
 import { v4 as uuidv4 } from "uuid";
-import { User } from "@schemas/users.schema";
 import { PrismaService } from "src/prisma.service";
 
 @Injectable()
 @JwtCustom("jwtCustom")
 export class UserService {
-  constructor(
-    @InjectModel("cl_users") private userModel: Model<User>,
-    private readonly prisma: PrismaService
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   private jwtCustom: IJwtCustom;
 
@@ -33,7 +27,7 @@ export class UserService {
     const user = await this.prisma.user.findFirst({
       where: {
         email,
-      }
+      },
     });
     return user;
   }
@@ -54,13 +48,16 @@ export class UserService {
 
   async findAllUsers() {
     const res = await this.prisma.user.findMany({
+      where: {
+        deleted_by: null
+      },
       select: {
         user_id: true,
         user_name: true,
         full_name: true,
         email: true,
-        phone: true
-      }
+        phone: true,
+      },
     });
 
     return res;

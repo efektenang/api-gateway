@@ -6,8 +6,14 @@ export const RouteUser: FX_ROUTERS.TRouterConfigs = {
   checks: {
     GET: [
       {
-        code: "GET-USER",
+        code: "GET-USERS",
         name: "Get data users",
+        auth: true,
+      },
+      {
+        suffix:":userId",
+        code: "GET-USER",
+        name: "Get current user info",
         auth: true,
       },
     ],

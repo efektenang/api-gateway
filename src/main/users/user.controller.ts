@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpStatus,
+  Param,
   Post,
   Req,
   Res,
@@ -36,6 +37,21 @@ export class UserController {
           { message: "[GET-USER] Authentication required" },
           { message: err.message }
         )
+      );
+  }
+
+  @Get(":userId")
+  async getCurrentUserInfo(
+    @Param("userId") params: string,
+    @Res() res: Response
+  ) {
+    return this.userService
+      .findUserIfExists(params)
+      .then((result) =>
+        res.asJson(HttpStatus.OK, { message: "OK", data: result })
+      )
+      .catch((err: any) =>
+        res.asJson(HttpStatus.BAD_REQUEST, { message: err.message })
       );
   }
 
