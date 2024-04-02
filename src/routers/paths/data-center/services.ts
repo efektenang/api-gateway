@@ -19,6 +19,12 @@ export const RouteServices: FX_ROUTERS.TRouterConfigs = {
         name: "Generate new services gateway",
         auth: true,
       },
+      {
+        suffix: "update-services/:serviceKey",
+        code: "POST-SERVE",
+        name: "Update information of services gateway",
+        auth: true,
+      },
     ]
   },
 };

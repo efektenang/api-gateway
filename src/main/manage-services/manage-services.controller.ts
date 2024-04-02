@@ -52,4 +52,29 @@ export class ManageServicesController {
         })
       );
   }
+
+  @Post("update-services/:serviceKey")
+  async updateServices(
+    @Body() body: UpdateServiceDTO,
+    @Res() res: Response,
+    @Req() req: Request,
+    @Headers() header: any,
+    @Param("serviceKey") params: string
+  ) {
+    return this.gateway
+      .updateBasicInfoServices(
+        {
+          userID: req.user_auth.user_id,
+          workspace: parseInt(header["x-workspace-id"]),
+        },
+        body,
+        params
+      )
+      .then((result) =>
+        res.asJson(HttpStatus.OK, { message: "OK", data: result })
+      )
+      .catch((err: any) =>
+        res.asJson(HttpStatus.BAD_REQUEST, { message: err.message })
+      );
+  }
 }
