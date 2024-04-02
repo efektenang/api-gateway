@@ -2,11 +2,9 @@ interface _IUsers {
   user_id: string;
   user_name: string;
   full_name: string;
-  phone_number: string;
-  country_code: string;
   email: string;
   password: string;
-  status: string;
+  phone: string;
   created_by: string;
   created_at: Date;
   updated_by: string;

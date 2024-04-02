@@ -2,7 +2,11 @@ import { Injectable } from "@nestjs/common";
 import ShortUniqueId from "short-unique-id";
 import { PrismaService } from "src/prisma.service";
 import * as encryptions from "@utilities/encryption.util";
-import { CreateServicesDTO, UpdateServiceDTO } from "@dtos/services.dto";
+import {
+  CreateRoutesDTO,
+  CreateServicesDTO,
+  UpdateServiceDTO,
+} from "@dtos/services.dto";
 
 @Injectable()
 export class GatewayServices {
@@ -16,7 +20,7 @@ export class GatewayServices {
 
   async findServicesKey(serviceKey: string) {
     try {
-      const service = await this.prisma.service.findFirst({
+      const service = await this.prisma.service.findUnique({
         where: { service_id: serviceKey },
       });
 
@@ -64,7 +68,10 @@ export class GatewayServices {
         throw new Error("You are not workspace owner");
 
       const updateData = await this.prisma.service.update({
-        where: { service_id: serviceKey, workspaceWorkspace_id: owner.workspace },
+        where: {
+          service_id: serviceKey,
+          workspaceWorkspace_id: owner.workspace,
+        },
         data: {
           ...serviceData,
           updated_by: owner.userID,
@@ -98,13 +105,59 @@ export class GatewayServices {
     }
   }
 
+  async generateRoutes(
+    owner: { userID: string; workspace: number },
+    data: CreateRoutesDTO
+  ) {
+    try {
+      const service = await this.findServicesKey(data.serviceService_id);
+      if (service.created_by !== owner.userID)
+        throw new Error("You are not workspace owner");
+
+      const routeID = encryptions.genRandomNumber(8);
+
+      const generate = await this.prisma.routes.create({
+        data: {
+          ...data,
+          route_id: routeID,
+          created_by: owner.userID,
+        },
+      });
+
+      return generate;
+    } catch (err: any) {
+      throw new Error(err.message);
+    }
+  }
+
   // async getGateway(url: { protocol: string; host: string }, params: any) {
   //   const hit = `${url.protocol}://${url.host}/${params.serviceId}/${params.routeId}/${params.endpoint}`;
   //   return hit;
   // }
 
-  async getGateway(url: { protocol: string; host: string }, params: any) {
-    const hit = `${url.protocol}://${url.host}${params}`;
-    return params;
+  async hitAPIGateway(serviceKey: string, routeId: number) {
+    try {
+      const service = await this.prisma.service.findUnique({
+        where: {
+          service_id: serviceKey,
+        },
+      });
+
+      if (!service) throw new Error("Service is invalid!");
+
+      const router = await this.prisma.routes.findUnique({
+        where: {
+          route_id: routeId,
+        },
+      });
+
+      const api = `${service.protocol}://${service.host}:${service.port}/${router}`
+
+      if (!router) throw new Error("Service is invalid!");
+
+      return {service: service.name, route: router.name}
+    } catch (err: any) {
+      throw new Error(err.message)
+    }
   }
 }

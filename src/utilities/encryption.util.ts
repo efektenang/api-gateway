@@ -42,6 +42,13 @@ export function genRandomString(length) {
     .slice(0, length);
 }
 
+export function genRandomNumber(length: number): number {
+  const randomNumber = Math.floor(Math.random() * 100000000);
+  const paddedNumber = randomNumber.toString().padStart(length, '0');
+
+  return parseInt(paddedNumber);
+}
+
 export function hashing(password, salt) {
   try {
     const hash = crypto.createHmac("sha256", salt);

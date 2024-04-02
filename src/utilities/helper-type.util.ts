@@ -3,7 +3,7 @@ import { Model } from 'sequelize-typescript'
 
 /** Declare your standart of JWT payload */
 export interface IJwtPayload {
-  user_name: string
+  user_id: string
   type: "CLIENT" | "SERVER"
   readonly exp?: number
   readonly iat?: number

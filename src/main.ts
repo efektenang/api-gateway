@@ -5,6 +5,7 @@ import { MainLogger } from '@utilities/logger.util'
 import * as morgan from 'morgan'
 import { Request } from '@utilities/helper-type.util'
 import { ValidationPipe } from '@nestjs/common'
+import { useContainer } from 'class-validator'
 
 const methodColors = {
   GET: 92,
@@ -79,6 +80,7 @@ async function bootstrap() {
     })
   )
 
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

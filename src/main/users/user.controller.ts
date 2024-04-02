@@ -84,7 +84,7 @@ export class UserController {
     @Req() req: Request
   ) {
     return this.userService
-      .changePassword(req.user_auth.user_name, body)
+      .changePassword(req.user_auth.user_id, body)
       .then((result) =>
         res.asJson(HttpStatus.OK, { message: "OK", data: result })
       )
@@ -100,7 +100,7 @@ export class UserController {
     @Req() req: Request
   ) {
     return this.userService
-      .updateBasicInfo(req.user_auth.user_name, body)
+      .updateBasicInfo(req.user_auth.user_id, body)
       .then((result) =>
         res.asJson(HttpStatus.OK, {
           message: "OK",

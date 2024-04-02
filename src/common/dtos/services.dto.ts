@@ -13,6 +13,11 @@ enum Protocol {
   HTTPS = "https",
 }
 
+enum Header {
+  STATIC = "static",
+  DYNAMIC = "dynamic",
+}
+
 export class CreateServicesDTO {
   @IsString()
   @IsNotEmpty()
@@ -36,3 +41,21 @@ export class CreateServicesDTO {
 }
 
 export class UpdateServiceDTO extends PartialType(CreateServicesDTO) {}
+
+export class CreateRoutesDTO {
+  @IsString()
+  @IsNotEmpty()
+  serviceService_id: string;
+
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @IsEnum(Header)
+  @IsNotEmpty()
+  valid_header: string;
+}

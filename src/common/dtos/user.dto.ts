@@ -1,17 +1,11 @@
 import { IsEmailUserAlreadyExist } from "@utilities/email-exists.validator";
 import {
   IsEmail,
-  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
   Matches,
 } from "class-validator";
-
-enum Status {
-  ACTIVE = "active",
-  DISABLED = "disabled",
-}
 
 export class LoginUserDto {
   @IsEmail()
@@ -51,22 +45,10 @@ export class UpdateBasicInfoDTO {
 
   @IsString()
   @IsOptional()
-  phone_number?: string;
-
-  @IsString()
-  @IsOptional()
-  country_code?: string;
-
-  @IsEnum(Status)
-  @IsOptional()
-  status?: string;
+  phone?: string;
 }
 
 export class RegisterUserDto {
-  @IsString()
-  @IsOptional()
-  user_id?: string;
-
   @IsString()
   @IsNotEmpty()
   user_name: string;
@@ -74,14 +56,6 @@ export class RegisterUserDto {
   @IsString()
   @IsOptional()
   full_name?: string;
-
-  @IsString()
-  @IsOptional()
-  phone_number?: string;
-
-  @IsString()
-  @IsOptional()
-  country_code?: string;
 
   @IsEmail()
   @IsEmailUserAlreadyExist({
@@ -101,25 +75,7 @@ export class RegisterUserDto {
   )
   password: string;
 
-  @IsEnum(Status)
+  @IsString()
   @IsOptional()
-  status?: string;
-
-  @IsOptional()
-  created_at?: Date;
-
-  @IsOptional()
-  created_by?: string;
-
-  @IsOptional()
-  updated_by?: string;
-
-  @IsOptional()
-  updated_at?: Date;
-
-  @IsOptional()
-  deleted_by?: string;
-
-  @IsOptional()
-  deleted_at?: Date;
+  phone?: string;
 }

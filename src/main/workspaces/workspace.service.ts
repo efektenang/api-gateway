@@ -12,12 +12,12 @@ export class WorkspaceServices {
     return workspaces;
   }
 
-  async createWorkspace(userName: string, data: CreateWorkspaceDTO) {
+  async createWorkspace(user_id: string, data: CreateWorkspaceDTO) {
     const saveData = await this.prisma.workspace.create({
       data: {
         ...data,
-        user_id: userName,
-        created_by: userName,
+        user_id: user_id,
+        created_by: user_id,
       },
     });
 

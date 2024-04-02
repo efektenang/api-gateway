@@ -4,12 +4,13 @@ import { IsEmailUserAlreadyExistConstraint } from "@utilities/email-exists.valid
 import { UserController } from "./user.controller";
 import { UserService } from "./user.service";
 import { UserSchema } from "@schemas/users.schema";
+import { PrismaService } from "src/prisma.service";
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: "cl_users", schema: UserSchema }]),
   ],
   controllers: [UserController],
-  providers: [UserService, IsEmailUserAlreadyExistConstraint],
+  providers: [UserService, PrismaService, IsEmailUserAlreadyExistConstraint],
 })
 export class UserModule {}

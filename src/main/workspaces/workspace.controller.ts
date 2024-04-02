@@ -34,7 +34,7 @@ export class WorkspaceController {
     @Req() req: Request
   ) {
     return this.workspaceService
-      .createWorkspace(req.user_auth.user_name, body)
+      .createWorkspace(req.user_auth.user_id, body)
       .then((result) =>
         res.asJson(HttpStatus.OK, { message: "OK", data: result })
       )
