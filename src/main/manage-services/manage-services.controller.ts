@@ -12,12 +12,23 @@ import {
 import { Request, Response } from "@utilities/helper-type.util";
 import {
   CreateServicesDTO,
+  UpdateServiceDTO,
 } from "@dtos/services.dto";
 import { ManageServices } from "./manage-services.service";
 
 @Controller()
 export class ManageServicesController {
   constructor(private readonly gateway: ManageServices) {}
+
+  @Get()
+  async getAllServices(@Res() res) {
+    return this.gateway.getServices().then((result) =>
+      res.json({
+        message: "OK",
+        data: result,
+      })
+    );
+  }
 
   @Post("generate-services")
   async saveServices(

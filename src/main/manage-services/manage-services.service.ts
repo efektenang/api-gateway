@@ -1,14 +1,27 @@
 import { Injectable } from "@nestjs/common";
 import ShortUniqueId from "short-unique-id";
 import { PrismaService } from "src/prisma.service";
-import {
-  CreateServicesDTO,
-  UpdateServiceDTO,
-} from "@dtos/services.dto";
+import { CreateServicesDTO } from "@dtos/services.dto";
 
 @Injectable()
 export class ManageServices {
   constructor(private readonly prisma: PrismaService) {}
+
+  async getServices() {
+    const services = await this.prisma.service.findMany({
+      select: {
+        service_id: true,
+        name: true,
+        description: true,
+        protocol: true,
+        host: true,
+        port: true,
+        status: true,
+      },
+    });
+
+    return services;
+  }
 
   async findServicesKey(serviceKey: string) {
     try {
