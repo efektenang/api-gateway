@@ -49,7 +49,7 @@ export class UserService {
   async findAllUsers() {
     const res = await this.prisma.user.findMany({
       where: {
-        deleted_by: null
+        deleted_by: null,
       },
       select: {
         user_id: true,
@@ -123,7 +123,7 @@ export class UserService {
         where: { user_id: userId },
         data: {
           password: [encPassword.hash, encPassword.salt].join(" "),
-          updated_by: userId,
+          updated_by: currentUser.user_name,
           updated_at: new Date(),
         },
       });
@@ -134,18 +134,33 @@ export class UserService {
 
   async updateBasicInfo(userId: string, data: UpdateBasicInfoDTO) {
     try {
-      await this.findUserIfExists(userId);
+      const user = await this.findUserIfExists(userId);
 
       const updateUser = await this.prisma.user.update({
         where: { user_id: userId },
         data: {
           ...data,
-          updated_by: userId,
+          updated_by: user.user_name,
           updated_at: new Date(),
         },
       });
 
       return updateUser;
+    } catch (err: any) {
+      throw new Error(err.message);
+    }
+  }
+
+  async softDeleteUser(userId: string, adminId: string): Promise<any> {
+    try {
+      const user = await this.findUserIfExists(userId);
+      await this.prisma.user.update({
+        where: { user_id: user.user_id },
+        data: {
+          deleted_by: adminId,
+          deleted_at: new Date(),
+        },
+      });
     } catch (err: any) {
       throw new Error(err.message);
     }

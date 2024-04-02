@@ -127,4 +127,20 @@ export class UserController {
         res.asJson(HttpStatus.BAD_REQUEST, { message: err.message })
       );
   }
+
+  @Post("delete/:userId")
+  async deleteUser(
+    @Param("userId") params: string,
+    @Res() res: Response,
+    @Req() req: Request
+  ) {
+    return this.userService
+      .softDeleteUser(params, req.user_auth.user_id)
+      .then((result) =>
+        res.asJson(HttpStatus.OK, { message: "OK", data: result })
+      )
+      .catch((err: any) =>
+        res.asJson(HttpStatus.BAD_REQUEST, { message: err.message })
+      );
+  }
 }

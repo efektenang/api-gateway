@@ -42,6 +42,12 @@ export const RouteUser: FX_ROUTERS.TRouterConfigs = {
         name: "Update basic user info",
         auth: true,
       },
+      {
+        suffix: "delete/:userId",
+        code: "POST-DELETE",
+        name: "Delete user",
+        auth: true,
+      },
     ],
   },
 };
