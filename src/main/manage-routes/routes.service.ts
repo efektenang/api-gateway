@@ -1,4 +1,4 @@
-import { CreateRoutesDTO } from "@dtos/services.dto";
+import { CreateEndpointDTO, CreateRoutesDTO } from "@dtos/services.dto";
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma.service";
 import * as encryptions from "@utilities/encryption.util";
@@ -33,6 +33,34 @@ export class RoutesService {
       return generate;
     } catch (err: any) {
       throw new Error(err.message);
+    }
+  }
+
+  async generateEndpoint(
+    owner: { userID: string; workspace: number },
+    data: CreateEndpointDTO
+  ) {
+    try {
+      const route = await this.prisma.routes.findUnique({
+        where: {
+          route_id: data.route_id
+        }
+      })
+      if (route.created_by !== owner.userID)
+        throw new Error("You are not workspace owner");
+
+      const saveEndpoint = await this.prisma.endpoints.create({
+        data: {
+          ...data,
+          created_by: owner.userID,
+          created_at: new Date(),
+          routesRoute_id: data.route_id
+        }
+      })
+
+      return saveEndpoint
+    } catch (err: any) {
+      throw new Error(err.message)
     }
   }
 }
