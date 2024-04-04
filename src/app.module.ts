@@ -15,6 +15,8 @@ import {
 import { FX_PUB, FxRouterModules } from "@fx-routers";
 import { MongooseModule } from "@nestjs/mongoose";
 import { mongoConfig } from "@utilities/database/mongo.config";
+import { CacheModule } from "@nestjs/cache-manager";
+import * as redisStore from "cache-manager-redis-store";
 
 // init base director
 global.__basedir = __dirname;
@@ -24,6 +26,14 @@ global.__basedir = __dirname;
     ConfigModule.forRoot({
       envFilePath: [`.env.${process.env.NEST_ENV}`],
       isGlobal: true,
+    }),
+    CacheModule.register({
+      isGlobal: true,
+      store: redisStore,
+      host: process.env.REDIS_HOST,
+      port: process.env.REDIS_PORT,
+      // auth_pass: process.env.REDIS_PASSWORD,
+      ttl: 30,
     }),
     MongooseModule.forRootAsync(mongoConfig),
     ...FxRouterModules.register(),
