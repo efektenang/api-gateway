@@ -1,3 +1,4 @@
+import { IServicesData } from "@interfaces/gateway.interface";
 import { HttpService } from "@nestjs/axios";
 import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import { BadGatewayException, Inject, Injectable } from "@nestjs/common";
@@ -47,6 +48,7 @@ export class GatewayService {
     const { serviceId, routeKey, path } = data;
     const serviceKey = getCacheToken<"gateway">("gateway", {
       SERVICE_ID: serviceId,
+      ROUTE_ID: routeKey
     });
     const gatewayCache = await this.cacheManager.get(serviceKey);
 
@@ -60,33 +62,52 @@ export class GatewayService {
       if (!service) throw new BadGatewayException("Services key is invalid");
 
       const route = await this.getRoutes(routeKey);
-      const endpoint = await this.getEndpoint(path);
+      if (route.valid_header === "static") {
+        const endpoint = await this.getEndpoint(path);
 
-      const data = {
+        const data: IServicesData = {
+          service_id: service.service_id,
+          protocol: service.protocol,
+          host: service.host,
+          port: service.port,
+          workspace: service.workspaceWorkspace_id,
+          route: route.route_id,
+          path: endpoint.path,
+        };
+
+        const staticData = JSON.stringify(data);
+        await this.cacheManager.set(serviceKey, staticData);
+
+        return staticData;
+      }
+
+      const data: IServicesData = {
         service_id: service.service_id,
         protocol: service.protocol,
         host: service.host,
         port: service.port,
         workspace: service.workspaceWorkspace_id,
         route: route.route_id,
-        path: endpoint.path,
+        path: path,
       };
 
       const stringData = JSON.stringify(data);
       await this.cacheManager.set(serviceKey, stringData);
-
       return stringData;
     }
 
     return gatewayCache;
   }
 
-  async dynamicHitAPI(params: any) {
+  async getMethodGateway(params: any) {
     const service: any = await this.getGatewayCache({
       serviceId: params.serviceKey,
+      routeKey: parseInt(params.routeKey),
+      path: params[0],
     });
     const services = JSON.parse(service);
-    const uri = `${services.protocol}://${services.host}:${services.port}/${params[0]}`;
+    const uri = `${services.protocol}://${services.host}:${services.port}/${services.path}`;
+
     const response = await firstValueFrom(
       this.http.get(uri).pipe(
         catchError((err: AxiosError) => {
@@ -94,10 +115,11 @@ export class GatewayService {
         })
       )
     );
+
     return response.data;
   }
 
-  async staticHitAPI(params: any, data: any) {
+  async postMethodGateway(params: any, data: any) {
     const service: any = await this.getGatewayCache({
       serviceId: params.serviceKey,
       routeKey: parseInt(params.routeKey),

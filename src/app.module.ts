@@ -35,7 +35,7 @@ global.__basedir = __dirname;
       // auth_pass: process.env.REDIS_PASSWORD,
       ttl: 30,
     }),
-    MongooseModule.forRootAsync(mongoConfig),
+    // MongooseModule.forRootAsync(mongoConfig),
     ...FxRouterModules.register(),
   ],
   controllers: [],

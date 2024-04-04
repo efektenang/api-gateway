@@ -16,11 +16,11 @@ import { RateLimiterGuard } from "nestjs-rate-limiter";
 export class GatewayController {
   constructor(private readonly gateway: GatewayService) {}
 
-  @Get(":serviceKey/*")
+  @Get(":serviceKey/:routeKey/*")
   @UseGuards(RateLimiterGuard)
-  async getHitAPI(@Param() params: string, @Res() res: Response) {
+  async sendGetMethod(@Param() params: string, @Res() res: Response) {
     return this.gateway
-      .dynamicHitAPI(params)
+      .getMethodGateway(params)
       .then((result) =>
         res.asJson(HttpStatus.OK, { message: "OK", data: result })
       )
@@ -31,13 +31,13 @@ export class GatewayController {
 
   @Post(":serviceKey/:routeKey/*")
   @UseGuards(RateLimiterGuard)
-  async sendStaticAPI(
+  async sendPostMethod(
     @Param() params: string,
     @Res() res: Response,
     @Body() body: any
   ) {
     return this.gateway
-      .staticHitAPI(params, body)
+      .postMethodGateway(params, body)
       .then((result) =>
         res.asJson(HttpStatus.OK, { message: "OK", data: result })
       )
