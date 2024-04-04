@@ -1,26 +1,19 @@
 import { HttpService } from "@nestjs/axios";
-import { BadGatewayException, Injectable } from "@nestjs/common";
-import { firstValueFrom } from "rxjs";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { BadGatewayException, Inject, Injectable } from "@nestjs/common";
+import getCacheToken from "@utilities/cache-token";
+import { AxiosError } from "axios";
+import { Cache } from "cache-manager";
+import { catchError, firstValueFrom } from "rxjs";
 import { PrismaService } from "src/prisma.service";
 
 @Injectable()
 export class GatewayService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly http: HttpService
+    private readonly http: HttpService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
-
-  async getServices(serviceKey: string) {
-    const service = await this.prisma.service.findUnique({
-      where: {
-        service_id: serviceKey,
-      },
-    });
-
-    if (!service) throw new BadGatewayException("Services key is invalid");
-
-    return service;
-  }
 
   async getRoutes(routeKey: number) {
     const route = await this.prisma.routes.findUnique({
@@ -46,24 +39,84 @@ export class GatewayService {
     return endpoint;
   }
 
+  async getGatewayCache(data: {
+    serviceId: string;
+    routeKey?: number;
+    path?: string;
+  }) {
+    const { serviceId, routeKey, path } = data;
+    const serviceKey = getCacheToken<"gateway">("gateway", {
+      SERVICE_ID: serviceId,
+    });
+    const gatewayCache = await this.cacheManager.get(serviceKey);
+
+    if (!gatewayCache) {
+      const service = await this.prisma.service.findUnique({
+        where: {
+          service_id: serviceId,
+        },
+      });
+
+      if (!service) throw new BadGatewayException("Services key is invalid");
+
+      const route = await this.getRoutes(routeKey);
+      const endpoint = await this.getEndpoint(path);
+
+      const data = {
+        service_id: service.service_id,
+        protocol: service.protocol,
+        host: service.host,
+        port: service.port,
+        workspace: service.workspaceWorkspace_id,
+        route: route.route_id,
+        path: endpoint.path,
+      };
+
+      const stringData = JSON.stringify(data);
+      await this.cacheManager.set(serviceKey, stringData);
+
+      return stringData;
+    }
+
+    return gatewayCache;
+  }
+
   async dynamicHitAPI(params: any) {
-    const services = await this.getServices(params.serviceKey);
+    const service: any = await this.getGatewayCache({
+      serviceId: params.serviceKey,
+    });
+    const services = JSON.parse(service);
     const uri = `${services.protocol}://${services.host}:${services.port}/${params[0]}`;
-    const response = await firstValueFrom(this.http.get(uri));
+    const response = await firstValueFrom(
+      this.http.get(uri).pipe(
+        catchError((err: AxiosError) => {
+          throw new BadGatewayException(err.message);
+        })
+      )
+    );
     return response.data;
   }
 
   async staticHitAPI(params: any, data: any) {
-    const services = await this.getServices(params.serviceKey);
-    const route = await this.getRoutes(parseInt(params.routeKey));
-    const endpoint = await this.getEndpoint(params[0]);
-    const uri = `${services.protocol}://${services.host}:${services.port}/${endpoint.path}`;
+    const service: any = await this.getGatewayCache({
+      serviceId: params.serviceKey,
+      routeKey: parseInt(params.routeKey),
+      path: params[0],
+    });
+    const services = JSON.parse(service);
+    const uri = `${services.protocol}://${services.host}:${services.port}/${services.path}`;
     const response = await firstValueFrom(
-      this.http.post(uri, data, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
+      this.http
+        .post(uri, data, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        .pipe(
+          catchError((err: AxiosError) => {
+            throw new BadGatewayException(err.message);
+          })
+        )
     );
     return response.data;
   }

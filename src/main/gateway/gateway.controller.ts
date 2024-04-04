@@ -1,12 +1,23 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, Res } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Param,
+  Post,
+  Res,
+  UseGuards,
+} from "@nestjs/common";
 import { GatewayService } from "./gateway.service";
 import { Response } from "@utilities/helper-type.util";
+import { RateLimiterGuard } from "nestjs-rate-limiter";
 
 @Controller()
 export class GatewayController {
   constructor(private readonly gateway: GatewayService) {}
 
   @Get(":serviceKey/*")
+  @UseGuards(RateLimiterGuard)
   async getHitAPI(@Param() params: string, @Res() res: Response) {
     return this.gateway
       .dynamicHitAPI(params)
@@ -19,7 +30,12 @@ export class GatewayController {
   }
 
   @Post(":serviceKey/:routeKey/*")
-  async sendStaticAPI(@Param() params: string, @Res() res: Response, @Body() body: any) {
+  @UseGuards(RateLimiterGuard)
+  async sendStaticAPI(
+    @Param() params: string,
+    @Res() res: Response,
+    @Body() body: any
+  ) {
     return this.gateway
       .staticHitAPI(params, body)
       .then((result) =>
