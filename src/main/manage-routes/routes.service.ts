@@ -7,6 +7,36 @@ import * as encryptions from "@utilities/encryption.util";
 export class RoutesService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async getRouteList(serviceKey: string) {
+    try {
+      const routes = await this.prisma.routes.findMany({
+        where: {
+          serviceService_id: serviceKey,
+          deleted_by: null,
+        },
+      });
+
+      return routes;
+    } catch (err: any) {
+      throw new Error(err.message);
+    }
+  }
+
+  async getEndpointList(routeID: number) {
+    try {
+      const endpoint = await this.prisma.endpoints.findMany({
+        where: {
+          routesRoute_id: routeID,
+          deleted_by: null,
+        },
+      });
+
+      return endpoint;
+    } catch (err: any) {
+      throw new Error(err.message);
+    }
+  }
+
   async generateRoutes(
     owner: { userID: string; workspace: number },
     data: CreateRoutesDTO
@@ -43,9 +73,9 @@ export class RoutesService {
     try {
       const route = await this.prisma.routes.findUnique({
         where: {
-          route_id: data.route_id
-        }
-      })
+          route_id: data.route_id,
+        },
+      });
       if (route.created_by !== owner.userID)
         throw new Error("You are not workspace owner");
 
@@ -54,13 +84,13 @@ export class RoutesService {
           ...data,
           created_by: owner.userID,
           created_at: new Date(),
-          routesRoute_id: data.route_id
-        }
-      })
+          routesRoute_id: data.route_id,
+        },
+      });
 
-      return saveEndpoint
+      return saveEndpoint;
     } catch (err: any) {
-      throw new Error(err.message)
+      throw new Error(err.message);
     }
   }
 }
