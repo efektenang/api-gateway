@@ -58,22 +58,8 @@ export class CreateRoutesDTO {
   @IsEnum(Header)
   @IsNotEmpty()
   valid_header: string;
-}
-
-export class CreateEndpointDTO {
-  @IsNumber()
-  @IsNotEmpty()
-  route_id: number;
-
-  @IsString()
-  @IsNotEmpty()
-  name: string;
-
-  @IsString()
-  @IsNotEmpty()
-  path: string;
 
   @IsString()
   @IsOptional()
-  description?: string;
+  path?: string;
 }

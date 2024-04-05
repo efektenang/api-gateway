@@ -1,15 +1,6 @@
--- CreateEnum
-CREATE TYPE "Protocols" AS ENUM ('http', 'https');
-
--- CreateEnum
-CREATE TYPE "Statuses" AS ENUM ('active', 'disabled');
-
--- CreateEnum
-CREATE TYPE "Header" AS ENUM ('static', 'dynamic');
-
 -- CreateTable
 CREATE TABLE "User" (
-    "user_id" SERIAL NOT NULL,
+    "user_id" TEXT NOT NULL,
     "user_name" TEXT NOT NULL,
     "full_name" TEXT,
     "email" TEXT NOT NULL,
@@ -37,7 +28,7 @@ CREATE TABLE "Workspace" (
     "updated_at" TIMESTAMP(3),
     "deleted_by" TEXT,
     "deleted_at" TIMESTAMP(3),
-    "userUser_id" INTEGER,
+    "userUser_id" TEXT,
 
     CONSTRAINT "Workspace_pkey" PRIMARY KEY ("workspace_id")
 );
@@ -84,7 +75,8 @@ CREATE TABLE "Routes" (
     "route_id" INTEGER NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
-    "valid_header" "Header" NOT NULL DEFAULT 'dynamic',
+    "valid_header" TEXT NOT NULL,
+    "path" TEXT NOT NULL,
     "created_by" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_by" TEXT,
@@ -94,24 +86,6 @@ CREATE TABLE "Routes" (
     "serviceService_id" TEXT,
 
     CONSTRAINT "Routes_pkey" PRIMARY KEY ("route_id")
-);
-
--- CreateTable
-CREATE TABLE "Endpoints" (
-    "endpoint_id" SERIAL NOT NULL,
-    "route_id" INTEGER NOT NULL,
-    "name" TEXT NOT NULL,
-    "path" TEXT NOT NULL,
-    "description" TEXT,
-    "created_by" TEXT NOT NULL,
-    "created_at" TIMESTAMP(3) NOT NULL,
-    "updated_by" TEXT,
-    "updated_at" TIMESTAMP(3),
-    "deleted_by" TEXT,
-    "deleted_at" TIMESTAMP(3),
-    "routesRoute_id" INTEGER,
-
-    CONSTRAINT "Endpoints_pkey" PRIMARY KEY ("endpoint_id")
 );
 
 -- CreateTable
@@ -143,6 +117,3 @@ ALTER TABLE "Service" ADD CONSTRAINT "Service_workspaceWorkspace_id_fkey" FOREIG
 
 -- AddForeignKey
 ALTER TABLE "Routes" ADD CONSTRAINT "Routes_serviceService_id_fkey" FOREIGN KEY ("serviceService_id") REFERENCES "Service"("service_id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Endpoints" ADD CONSTRAINT "Endpoints_routesRoute_id_fkey" FOREIGN KEY ("routesRoute_id") REFERENCES "Routes"("route_id") ON DELETE SET NULL ON UPDATE CASCADE;

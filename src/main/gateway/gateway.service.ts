@@ -28,18 +28,6 @@ export class GatewayService {
     return route;
   }
 
-  async getEndpoint(path: string) {
-    const endpoint = await this.prisma.endpoints.findFirst({
-      where: {
-        path: path,
-      },
-    });
-
-    if (!endpoint) throw new BadGatewayException("Enpoint is invalid");
-
-    return endpoint;
-  }
-
   async getGatewayCache(data: {
     serviceId: string;
     routeKey?: number;
@@ -62,9 +50,7 @@ export class GatewayService {
       if (!service) throw new BadGatewayException("Services key is invalid");
 
       const route = await this.getRoutes(routeKey);
-      if (route.valid_header === "static") {
-        const endpoint = await this.getEndpoint(path);
-
+      if (route.valid_header === "static" && route.path !== null) {
         const data: IServicesData = {
           service_id: service.service_id,
           protocol: service.protocol,
@@ -72,7 +58,7 @@ export class GatewayService {
           port: service.port,
           workspace: service.workspaceWorkspace_id,
           route: route.route_id,
-          path: endpoint.path,
+          path: route.path,
         };
 
         const staticData = JSON.stringify(data);
@@ -106,7 +92,7 @@ export class GatewayService {
       path: params[0],
     });
     const services = JSON.parse(service);
-    const uri = `${services.protocol}://${services.host}:${services.port}/${services.path}`;
+    const uri = `${services.protocol}://${services.host}:${services.port}${params[0]}`;
 
     const response = await firstValueFrom(
       this.http.get(uri).pipe(
@@ -126,7 +112,7 @@ export class GatewayService {
       path: params[0],
     });
     const services = JSON.parse(service);
-    const uri = `${services.protocol}://${services.host}:${services.port}/${services.path}`;
+    const uri = `${services.protocol}://${services.host}:${services.port}${services.path}`;
     const response = await firstValueFrom(
       this.http
         .post(uri, data, {
