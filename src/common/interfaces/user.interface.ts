@@ -5,6 +5,7 @@ interface _IUsers {
   email: string;
   password: string;
   phone: string;
+  role_user: string;
   created_by: string;
   created_at: Date;
   updated_by: string;

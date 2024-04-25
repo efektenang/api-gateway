@@ -6,12 +6,12 @@ export const RouteUser: FX_ROUTERS.TRouterConfigs = {
   checks: {
     GET: [
       {
-        code: "GET-USERS",
+        code: "GET-USER",
         name: "Get data users",
         auth: true,
       },
       {
-        suffix:":userId",
+        suffix: ":userId",
         code: "GET-USER",
         name: "Get current user info",
         auth: true,
@@ -28,7 +28,7 @@ export const RouteUser: FX_ROUTERS.TRouterConfigs = {
         suffix: "register",
         code: "POST-REG",
         name: "Register new user.",
-        auth: false,
+        auth: true,
       },
       {
         suffix: "change-password",
@@ -40,12 +40,6 @@ export const RouteUser: FX_ROUTERS.TRouterConfigs = {
         suffix: "update",
         code: "POST-UPDATE",
         name: "Update basic user info",
-        auth: true,
-      },
-      {
-        suffix: "delete/:userId",
-        code: "POST-DELETE",
-        name: "Delete user",
         auth: true,
       },
     ],

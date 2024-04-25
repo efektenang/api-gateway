@@ -13,97 +13,103 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
+model user {
   user_id    String      @id
   user_name  String
   full_name  String?
   email      String      @unique
   password   String
   phone      String?
+  role_user  String
   created_by String
   created_at DateTime    @default(now())
   updated_by String?
   updated_at DateTime?
   deleted_by String?
   deleted_at DateTime?
-  workspaces Workspace[]
+  workspaces workspace[]
 }
 
-model Workspace {
-  workspace_id Int               @id @default(autoincrement())
-  user_id      String
+model workspace {
+  workspace_id Int                @id @default(autoincrement())
   name         String
   description  String?
   created_by   String
-  created_at   DateTime          @default(now())
+  created_at   DateTime           @default(now())
   updated_by   String?
   updated_at   DateTime?
   deleted_by   String?
   deleted_at   DateTime?
-  member       WorkspaceMember[]
-  services     Service[]
-  User         User?             @relation(fields: [userUser_id], references: [user_id])
-  userUser_id  String?
+  user         user?              @relation(fields: [owner_id], references: [user_id])
+  owner_id     String?
+  member       workspace_member[]
 }
 
-model WorkspaceMember {
-  member_id             Int        @id @default(autoincrement())
-  user_id               String
-  workspace_id          Int
-  description           String?
-  created_by            String
-  created_at            DateTime
-  updated_by            String?
-  updated_at            DateTime?
-  deleted_by            String?
-  deleted_at            DateTime?
-  Workspace             Workspace? @relation(fields: [workspaceWorkspace_id], references: [workspace_id])
-  workspaceWorkspace_id Int?
+model workspace_member {
+  member_id           Int        @id @default(autoincrement())
+  member_user_id      String
+  rule                String
+  description         String?
+  created_by          String
+  created_at          DateTime
+  updated_by          String?
+  updated_at          DateTime?
+  deleted_by          String?
+  deleted_at          DateTime?
+  workspace           workspace? @relation(fields: [member_workspace_id], references: [workspace_id])
+  member_workspace_id Int?
 }
 
-model Service {
-  service_id            String     @id
-  name                  String
-  description           String?
-  protocol              String
-  host                  String
-  port                  Int
-  status                String
-  created_by            String
-  created_at            DateTime   @default(now())
-  updated_by            String?
-  updated_at            DateTime?
-  deleted_by            String?
-  deleted_at            DateTime?
-  routes                Routes[]
-  Workspace             Workspace? @relation(fields: [workspaceWorkspace_id], references: [workspace_id])
-  workspaceWorkspace_id Int?
+model service {
+  service_id   String    @id
+  workspace_id Int
+  name         String
+  description  String?
+  protocol     String
+  host         String
+  port         Int
+  status       String
+  created_by   String
+  created_at   DateTime  @default(now())
+  updated_by   String?
+  updated_at   DateTime?
+  deleted_by   String?
+  deleted_at   DateTime?
 }
 
-model Routes {
-  route_id          Int       @id
-  name              String
-  description       String?
-  valid_header      String
-  path              String?
-  created_by        String
-  created_at        DateTime  @default(now())
-  updated_by        String?
-  updated_at        DateTime?
-  deleted_by        String?
-  deleted_at        DateTime?
-  Service           Service?  @relation(fields: [serviceService_id], references: [service_id])
-  serviceService_id String?
+model whitelist_address {
+  id         Int     @id @default(autoincrement())
+  service_id String
+  address    String
+  type       String?
 }
 
-model Endpoint_Methods {
-  id          Int       @id @default(autoincrement())
-  method      String
-  description String
-  created_by  String
-  created_at  DateTime
-  updated_by  String?
-  updated_at  DateTime?
-  deleted_by  String?
-  deleted_at  DateTime?
+model routes {
+  route_id     Int                @id
+  service_id   String
+  name         String
+  description  String?
+  valid_header String
+  path         String?
+  created_by   String
+  created_at   DateTime           @default(now())
+  updated_by   String?
+  updated_at   DateTime?
+  deleted_by   String?
+  deleted_at   DateTime?
+  method       endpoint_methods[]
+}
+
+model endpoint_methods {
+  id              Int       @id @default(autoincrement())
+  method          String
+  description     String?
+  created_by      String
+  created_at      DateTime
+  updated_by      String?
+  updated_at      DateTime?
+  deleted_by      String?
+  deleted_at      DateTime?
+  routes          routes?   @relation(fields: [method_route_id], references: [route_id])
+  method_route_id Int?
 }

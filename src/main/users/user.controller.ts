@@ -7,6 +7,7 @@ import {
   Post,
   Req,
   Res,
+  UseGuards,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import {
@@ -16,12 +17,16 @@ import {
   UpdateBasicInfoDTO,
 } from "@dtos/user.dto";
 import { Request, Response } from "@utilities/helper-type.util";
+import { RolesGuard } from "./roles/roles.guard";
+import { Role, Roles } from "./roles/roles.decorator";
 
 @Controller()
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
+  @UseGuards(RolesGuard)
+  @Roles(Role.Server)
   async getAllUser(@Res() res: Response) {
     return this.userService
       .findAllUsers()
@@ -41,6 +46,8 @@ export class UserController {
   }
 
   @Get(":userId")
+  @UseGuards(RolesGuard)
+  @Roles(Role.Server)
   async getCurrentUserInfo(
     @Param("userId") params: string,
     @Res() res: Response
@@ -75,6 +82,8 @@ export class UserController {
   }
 
   @Post("register")
+  @UseGuards(RolesGuard)
+  @Roles(Role.Server)
   async register(@Body() body: RegisterUserDto, @Res() res: Response) {
     return this.userService
       .registerUser(body)
@@ -124,22 +133,6 @@ export class UserController {
         })
       )
       .catch((err) =>
-        res.asJson(HttpStatus.BAD_REQUEST, { message: err.message })
-      );
-  }
-
-  @Post("delete/:userId")
-  async deleteUser(
-    @Param("userId") params: string,
-    @Res() res: Response,
-    @Req() req: Request
-  ) {
-    return this.userService
-      .softDeleteUser(params, req.user_auth.user_id)
-      .then((result) =>
-        res.asJson(HttpStatus.OK, { message: "OK", data: result })
-      )
-      .catch((err: any) =>
         res.asJson(HttpStatus.BAD_REQUEST, { message: err.message })
       );
   }

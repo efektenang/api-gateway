@@ -1,6 +1,5 @@
 import { PartialType } from "@nestjs/mapped-types";
 import {
-  IsEmail,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -13,9 +12,14 @@ enum Protocol {
   HTTPS = "https",
 }
 
-enum Header {
-  STATIC = "static",
-  DYNAMIC = "dynamic",
+enum Statuses {
+  ACTIVE = "active",
+  DISABLED = "disabled"
+}
+
+enum TypeAddress {
+  Whitelist = "whitelist",
+  Blactlist = "blacklist"
 }
 
 export class CreateServicesDTO {
@@ -40,13 +44,7 @@ export class CreateServicesDTO {
   port: number;
 }
 
-export class UpdateServiceDTO extends PartialType(CreateServicesDTO) {}
-
-export class CreateRoutesDTO {
-  @IsString()
-  @IsNotEmpty()
-  serviceService_id: string;
-
+export class UpdateServiceDTO {
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -55,11 +53,33 @@ export class CreateRoutesDTO {
   @IsOptional()
   description?: string;
 
-  @IsEnum(Header)
+  @IsEnum(Protocol)
   @IsNotEmpty()
-  valid_header: string;
+  protocol: string;
 
   @IsString()
+  @IsNotEmpty()
+  host: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  port: number;
+
+  @IsEnum(Statuses)
   @IsOptional()
-  path?: string;
+  status: string;
+}
+
+export class WhitelistAddressDTO {
+  @IsString()
+  @IsNotEmpty()
+  service_id: string;
+
+  @IsString()
+  @IsNotEmpty()
+  address: string;
+
+  @IsEnum(TypeAddress)
+  @IsOptional()
+  type: string;
 }

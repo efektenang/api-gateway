@@ -2,7 +2,6 @@ import {
   MiddlewareConsumer,
   Module,
   NestModule,
-  Provider,
 } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import {
@@ -14,9 +13,10 @@ import {
 } from "@middlewares";
 import { FX_PUB, FxRouterModules } from "@fx-routers";
 import { MongooseModule } from "@nestjs/mongoose";
-import { mongoConfig } from "@utilities/database/mongo.config";
 import { CacheModule } from "@nestjs/cache-manager";
 import * as redisStore from "cache-manager-redis-store";
+import { WhitelistMiddleware } from "./middlewares/filter-ip.mware";
+import { CheckWorkspaceMember } from "./middlewares/workspace.mware";
 
 // init base director
 global.__basedir = __dirname;
@@ -33,9 +33,11 @@ global.__basedir = __dirname;
       host: process.env.REDIS_HOST,
       port: process.env.REDIS_PORT,
       // auth_pass: process.env.REDIS_PASSWORD,
-      ttl: 30,
+      ttl: 60,
     }),
-    // MongooseModule.forRootAsync(mongoConfig),
+    MongooseModule.forRoot(process.env.MONGO_DB, {
+      dbName: process.env.DB_NAME,
+    }),
     ...FxRouterModules.register(),
   ],
   controllers: [],
@@ -49,7 +51,9 @@ export class AppModule implements NestModule {
         ResponseMiddleware,
         RequestBodyMiddleware,
         AuthMiddleware,
-        ProtectMiddleware
+        ProtectMiddleware,
+        WhitelistMiddleware,
+        CheckWorkspaceMember
       )
       .forRoutes("*");
   }

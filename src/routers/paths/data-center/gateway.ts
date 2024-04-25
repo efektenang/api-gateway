@@ -6,15 +6,33 @@ export const RouteGateway: FX_ROUTERS.TRouterConfigs = {
   checks: {
     GET: [
       {
-        code: "GET-REG",
-        name: "Get data region",
+        suffix: "?/?/(.*)",
+        code: "GET-GATEWAY",
+        name: "Get method of API Gateway.",
         auth: false,
       },
     ],
     POST: [
       {
-        code: "POST-REG",
-        name: "Get data region",
+        suffix: "?/?/(.*)",
+        code: "POST-GATEWAY",
+        name: "POST method of API Gateway.",
+        auth: false,
+      },
+    ],
+    PUT: [
+      {
+        suffix: "?/?/(.*)",
+        code: "PUT-GATEWAY",
+        name: "PUT method of API Gateway.",
+        auth: false,
+      },
+    ],
+    DELETE: [
+      {
+        suffix: "?/?/(.*)",
+        code: "DELETE-GATEWAY",
+        name: "DELETE method of API Gateway.",
         auth: false,
       },
     ],

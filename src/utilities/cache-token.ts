@@ -1,9 +1,9 @@
 interface ICacheToken {
-    gateway: { SERVICE_ID: string; ROUTE_ID: number};
+  gateway: { SERVICE_ID: string; ROUTE_ID: number; PATH: string; METHOD: string; };
   }
   
   const cacheToken = {
-    gateway: "APIGATEWAY@$SERVICE_ID:$ROUTE_ID"
+    gateway: "GATEWAY@$SERVICE_ID:$ROUTE_ID:$PATH:$METHOD"
   };
   
   export default function getCacheToken<T extends keyof typeof cacheToken>(

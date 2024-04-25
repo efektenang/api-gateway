@@ -1,11 +1,17 @@
 import { IsEmailUserAlreadyExist } from "@utilities/email-exists.validator";
 import {
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
   Matches,
 } from "class-validator";
+
+enum Role {
+  SERVER = "SERVER",
+  CLIENT = "CLIENT",
+}
 
 export class LoginUserDto {
   @IsEmail()
@@ -78,4 +84,7 @@ export class RegisterUserDto {
   @IsString()
   @IsOptional()
   phone?: string;
+
+  @IsEnum(Role)
+  role_user: string;
 }

@@ -47,23 +47,28 @@ export class UserService {
   }
 
   async findAllUsers() {
-    const res = await this.prisma.user.findMany({
-      where: {
-        deleted_by: null,
-      },
-      select: {
-        user_id: true,
-        user_name: true,
-        full_name: true,
-        email: true,
-        phone: true,
-      },
-    });
+    try {
+      const res = await this.prisma.user.findMany({
+        where: {
+          deleted_by: null,
+        },
+        select: {
+          user_id: true,
+          user_name: true,
+          full_name: true,
+          email: true,
+          phone: true,
+          role_user: true
+        },
+      });
 
-    return res;
+      return res;
+    } catch (err: any) {
+      throw new Error(err.message);
+    }
   }
 
-  async login(data: LoginUserDto) {
+  async login(data: LoginUserDto): Promise<{token: string}> {
     try {
       const exists = await this.findOneUsers(data.email);
 
@@ -82,7 +87,7 @@ export class UserService {
 
       const token: string = await this.jwtCustom.generateToken({
         user_id: exists.user_id,
-        type: "SERVER",
+        type: exists.role_user,
       });
 
       return { token };
@@ -146,21 +151,6 @@ export class UserService {
       });
 
       return updateUser;
-    } catch (err: any) {
-      throw new Error(err.message);
-    }
-  }
-
-  async softDeleteUser(userId: string, adminId: string): Promise<any> {
-    try {
-      const user = await this.findUserIfExists(userId);
-      await this.prisma.user.update({
-        where: { user_id: user.user_id },
-        data: {
-          deleted_by: adminId,
-          deleted_at: new Date(),
-        },
-      });
     } catch (err: any) {
       throw new Error(err.message);
     }

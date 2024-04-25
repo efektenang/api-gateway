@@ -44,7 +44,7 @@ export function genRandomString(length) {
 
 export function genRandomNumber(length: number): number {
   const randomNumber = Math.floor(Math.random() * 100000000);
-  const paddedNumber = randomNumber.toString().padStart(length, '0');
+  const paddedNumber = randomNumber.toString().padStart(length, "0");
 
   return parseInt(paddedNumber);
 }

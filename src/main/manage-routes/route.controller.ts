@@ -1,7 +1,11 @@
 import {
+  ConfigEndpointsDTO,
+  CreateRoutesDTO,
+  UpdateRouteDTO,
+} from "@dtos/route.dto";
+import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpStatus,
   Param,
@@ -13,23 +17,18 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { Request, Response } from "@utilities/helper-type.util";
-import {
-  CreateServicesDTO,
-  UpdateServiceDTO,
-  WhitelistAddressDTO,
-} from "@dtos/services.dto";
-import { ManageServices } from "./manage-services.service";
+import { RouteService } from "./route.service";
 import { RolesGuard } from "@main/users/roles/roles.guard";
 import { Role, Roles } from "@main/users/roles/roles.decorator";
 
 @Controller()
-export class ManageServicesController {
-  constructor(private readonly services: ManageServices) {}
+export class RouteController {
+  constructor(private readonly routeService: RouteService) {}
 
-  @Get()
-  async getServices(@Res() res: Response, @Query() query) {
-    return this.services
-      .getListServices(parseInt(query.workspaceId))
+  @Get("route-list/:serviceKey")
+  async getRoute(@Res() res: Response, @Param("serviceKey") params: string) {
+    return this.routeService
+      .getRouteList(params)
       .then((result) =>
         res.asJson(HttpStatus.OK, { message: "OK", data: result })
       )
@@ -38,85 +37,77 @@ export class ManageServicesController {
       );
   }
 
-  @Post("generate-services")
+  @Get("endpoint/logs")
   @UseGuards(RolesGuard)
   @Roles(Role.Server)
-  async saveServices(
-    @Body() body: CreateServicesDTO,
+  async getAllLogs(@Res() res: Response, @Query() query) {
+    return this.routeService
+      .getEndpointLogs(query)
+      .then((result) =>
+        res.asJson(HttpStatus.OK, { message: "OK", data: result })
+      )
+      .catch((err: any) =>
+        res.asJson(HttpStatus.BAD_REQUEST, { message: err.message })
+      );
+  }
+
+  @Post("split-endpoint")
+  @UseGuards(RolesGuard)
+  @Roles(Role.Server)
+  async configSplitEndpoint(
+    @Body() body: ConfigEndpointsDTO,
     @Res() res: Response,
     @Req() req: Request,
-    @Query() query: any
   ) {
-    return this.services
-      .createServices(
-        {
-          userID: req.user_auth.user_id,
-          workspace: parseInt(query.workspaceId),
-        },
+    return this.routeService
+      .configEndpoints(
+        req.user_auth.user_id,
         body
       )
       .then((result) =>
-        res.asJson(HttpStatus.OK, {
-          message: "OK",
-          data: result,
-        })
+        res.asJson(HttpStatus.OK, { message: "OK", data: result })
       )
       .catch((err: any) =>
         res.asJson(HttpStatus.BAD_REQUEST, { message: err.message })
       );
   }
 
-  @Put(":serviceKey")
+  @Post("generate-routes")
   @UseGuards(RolesGuard)
   @Roles(Role.Server)
-  async updateServices(
-    @Body() body: UpdateServiceDTO,
+  async createStaticRoute(
+    @Body() body: CreateRoutesDTO,
+    @Res() res: Response,
+    @Req() req: Request
+  ) {
+    return this.routeService
+      .generateRoutes(
+        req.user_auth.user_id,
+        body
+      )
+      .then((result) =>
+        res.asJson(HttpStatus.OK, { message: "OK", data: result })
+      )
+      .catch((err: any) =>
+        res.asJson(HttpStatus.BAD_REQUEST, { message: err.message })
+      );
+  }
+
+  @Put(":routeId")
+  @UseGuards(RolesGuard)
+  @Roles(Role.Server)
+  async updateStaticRoute(
+    @Body() body: UpdateRouteDTO,
     @Res() res: Response,
     @Req() req: Request,
-    @Param() params: any,
-    @Query() query: any
-  ) {
-    return this.services
-      .updateServiceInfo(
-        {
-          userID: req.user_auth.user_id,
-          workspace: parseInt(query.workspaceId),
-        },
-        body,
-        params.serviceKey
-      )
-      .then((result) =>
-        res.asJson(HttpStatus.OK, { message: "OK", data: result })
-      )
-      .catch((err: any) =>
-        res.asJson(HttpStatus.BAD_REQUEST, { message: err.message })
-      );
-  }
-
-  @Post("add/filter-address")
-  @UseGuards(RolesGuard)
-  @Roles(Role.Server)
-  async addWhitelists(@Body() body: WhitelistAddressDTO, @Res() res: Response) {
-    return this.services
-      .addWhitelistAddress(body)
-      .then((result) =>
-        res.asJson(HttpStatus.OK, { message: "OK", data: result })
-      )
-      .catch((err: any) =>
-        res.asJson(HttpStatus.BAD_REQUEST, { message: err.message })
-      );
-  }
-
-  @Put("filter-address/:addressId")
-  @UseGuards(RolesGuard)
-  @Roles(Role.Server)
-  async updateWhitelist(
-    @Body() body: WhitelistAddressDTO,
-    @Res() res: Response,
     @Param() params: any
   ) {
-    return this.services
-      .updateFilterAddress(body, parseInt(params.addressId))
+    return this.routeService
+      .updateRoutesGateway(
+        req.user_auth.user_id,
+        body,
+        parseInt(params.routeId)
+      )
       .then((result) =>
         res.asJson(HttpStatus.OK, { message: "OK", data: result })
       )
@@ -125,16 +116,21 @@ export class ManageServicesController {
       );
   }
 
-  @Delete(":serviceKey")
+  @Post("delete/:routeId")
   @UseGuards(RolesGuard)
   @Roles(Role.Server)
-  async deletedServices(
+  async deleteRoute(
     @Res() res: Response,
-    @Param("serviceKey") params: string
+    @Req() req: Request,
+    @Param() params: any
   ) {
-    return this.services
-      .deleteServices(params)
-      .then((result) => res.asJson(HttpStatus.OK, { message: "OK" }))
+    return this.routeService
+      .deleteSpecificRoute(
+        parseInt(params.routeId)
+      )
+      .then((result) =>
+        res.asJson(HttpStatus.OK, { message: "OK", data: result })
+      )
       .catch((err: any) =>
         res.asJson(HttpStatus.BAD_REQUEST, { message: err.message })
       );
