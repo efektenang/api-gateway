@@ -32,7 +32,7 @@ global.__basedir = __dirname;
       store: redisStore,
       host: process.env.REDIS_HOST,
       port: process.env.REDIS_PORT,
-      // auth_pass: process.env.REDIS_PASSWORD,
+      auth_pass: process.env.REDIS_PASSWORD,
       ttl: 60,
     }),
     MongooseModule.forRoot(process.env.MONGO_DB, {
